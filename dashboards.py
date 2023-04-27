@@ -7,18 +7,31 @@ df = pd.read_csv('clean_data.csv')
 app = Dash(__name__)
 
 app.layout = html.Div([
-    html.H1(children='League of Legends Champion Pick %', style={'textAlign':'center'}),
-    dcc.Dropdown(df.Role.unique(), 'TOP', id='dropdown-selection'),
-    dcc.Graph(id='graph-content')
-])
+    html.H1(children='League of Legends Most Picked Champions', style={'textAlign':'center'}),
+    dcc.Dropdown(df.Role.unique(), 'TOP', id='role-dropdown'),
+    dcc.Graph(id='role-graph'),
+    html.H1(children='League of Legends Winrate by Role', style={'textAlign':'center'}),
+    dcc.Dropdown(df.Class.unique(), 'Fighter', id='class-dropdown'),
+    dcc.Graph(id='class-graph')
 
+])
 @callback(
-    Output('graph-content', 'figure'),
-    Input('dropdown-selection', 'value')
+    Output('role-graph', 'figure'),
+    Input('role-dropdown', 'value')
 )
 def update_graph(value):
     dff = df[df.Role==value]
     return px.bar(x='Name', y='Pick %', data_frame=dff.sort_values(by=['Pick %'], ascending=False).reset_index()[:10], color='Name')
+
+@callback(
+    Output('class-graph', 'figure'),
+    Input('class-dropdown', 'value')
+)
+def update_graph(value):
+    dff = df[df.Class==value]
+    return px.bar(x='Name', y='Win %', data_frame=dff.sort_values(by=['Win %'], ascending=False).reset_index()[:10], color='Name')
+
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)
